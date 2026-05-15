@@ -1,5 +1,25 @@
 services:
   api:
-    build: .
+    build:
+      context: .
+      target: final
     ports:
-      - "8080:8080"
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+
+  tests:
+    build:
+      context: .
+      target: test
+    profiles:
+      - test

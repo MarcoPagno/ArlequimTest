@@ -14,7 +14,44 @@ REST API desenvolvida em **ASP.NET Core 9** com autenticação JWT, testes unit�
 | Microsoft.AspNetCore.Mvc.Testing | 9.0 | Testes de integração com WebApplicationFactory |
 | Microsoft.AspNetCore.Authentication.JwtBearer | 9.0 | Autenticação via JWT |
 | BCrypt.Net-Next | 4.x | Hash de senhas |
+| OpenTelemetry | 1.x | Tracing e APM |
+| Jaeger | latest | Dashboard de visualização de traces |
 | Docker | 29.x | Containerização |
+
+---
+
+## Decisões Técnicas
+
+### Persistência em memória
+
+Optou-se por persistência em memória (`List<T>` estática) em vez de um banco de dados relacional. O desafio não especifica banco de dados, e a adição de PostgreSQL ou SQL Server introduziria configuração de connection string, migrations e setup adicional no Docker sem agregar valor à avaliação das funcionalidades em si. Em um ambiente de produção, a substituição seria direta — os Services são a única camada que precisaria ser alterada, mantendo Controllers e DTOs intactos. A escolha natural seria PostgreSQL com Entity Framework Core.
+
+### Testes de integração além dos unitários
+
+O desafio solicita testes unitários. Optou-se por adicionar também testes de integração usando `WebApplicationFactory`, que sobem a API em memória e realizam requisições HTTP reais contra ela. Isso garante que o fluxo completo — autenticação, autorização, validação e resposta — funciona de ponta a ponta, não apenas a lógica isolada de cada Service.
+
+### Exceptions de domínio personalizadas
+
+Em vez de lançar `Exception` genérica ou retornar objetos de erro manualmente, foi criada uma hierarquia de exceptions com HTTP status code embutido. Cada tipo de erro tem sua própria classe:
+
+| Exception | Status HTTP | Uso |
+|---|---|---|
+| `ValidationError` | 400 | Dados inválidos na requisição |
+| `UnauthorizedError` | 401 | Usuário não autenticado |
+| `ConflictError` | 409 | Recurso já existe (e-mail, nome de produto) |
+| `NotFoundError` | 404 | Recurso não encontrado |
+| `MethodNotAllowedError` | 405 | Método HTTP não permitido |
+| `InternalServerError` | 500 | Erro inesperado interno |
+
+Os Controllers capturam apenas `AppException` (classe base) e delegam o status code para a própria exception, mantendo o código de tratamento de erro centralizado e sem repetição.
+
+### Status de pedido não implementado
+
+O H5 não especifica um fluxo de aprovação ou cancelamento de pedidos. Adicionar status (`Pending`, `Confirmed`, `Cancelled`) sem uma regra de negócio clara seria over-engineering — o pedido é confirmado diretamente na criação, com baixa de estoque imediata. Caso o negócio evolua para um fluxo de aprovação, o campo `Status` pode ser adicionado ao model `Order` sem impacto nas outras entidades.
+
+### Tracing com OpenTelemetry e Jaeger
+
+Implementado como diferencial do desafio. O OpenTelemetry instrumenta automaticamente todas as requisições HTTP, registrando tempo de resposta e metadados de cada endpoint. O Jaeger coleta e exibe esses dados em um dashboard visual acessível em `http://localhost:16686`. Isso permite identificar gargalos de performance — por exemplo, o endpoint de login é visivelmente mais lento por conta do BCrypt, que é intencionalmente custoso para dificultar ataques de força bruta.
 
 ---
 
@@ -52,6 +89,8 @@ docker compose up --build
 ```
 
 A API estará disponível em `http://localhost:8080`.
+
+O dashboard de tracing Jaeger estará disponível em `http://localhost:16686`.
 
 ---
 
@@ -182,7 +221,7 @@ curl -X POST http://localhost:8080/api/stock \
   -d '{
     "productName": "Notebook",
     "quantity": 50,
-    "invoiceNumber": "NF-2026-001"
+    "invoiceNumber": "2026000000123"
   }'
 ```
 
@@ -192,7 +231,7 @@ curl -X POST http://localhost:8080/api/stock \
   "id": 1,
   "productName": "Notebook",
   "quantity": 50,
-  "invoiceNumber": "NF-2026-001",
+  "invoiceNumber": "2026000000123",
   "createdAt": "2026-01-01T00:00:00Z"
 }
 ```
