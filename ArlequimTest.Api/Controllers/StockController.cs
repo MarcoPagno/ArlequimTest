@@ -9,7 +9,7 @@ namespace ArlequimTest.Api.Controllers;
 
 [ApiController]
 [Route("api/stock")]
-[Authorize(Roles = "Admin")]
+[Authorize]
 public class StockController : ControllerBase
 {
     private readonly StockService _stockService;
@@ -20,6 +20,7 @@ public class StockController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public IActionResult AddStock([FromBody] CreateStockEntryDto dto)
     {
         try
@@ -34,7 +35,6 @@ public class StockController : ControllerBase
     }
 
     [HttpGet("{productName}")]
-    [AllowAnonymous]
     public IActionResult GetStock(string productName)
     {
         try
