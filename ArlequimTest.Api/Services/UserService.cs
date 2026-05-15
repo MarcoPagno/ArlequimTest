@@ -2,7 +2,6 @@
 using ArlequimTest.Api.Models;
 using System.Security.Claims;
 using System.Text;
-using BCrypt.Net;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using ArlequimTest.Api.Exceptions;
@@ -16,7 +15,7 @@ namespace ArlequimTest.Api.Services
         public User Create(CreateUserDto dto)
         {
             if (_users.Any(u => u.Email.ToLower() == dto.Email.ToLower()))
-                throw new ValidationError("Email already in use");
+                throw new ConflictError("Email already in use");
 
             if (dto.Password.Length < 6)
                 throw new ValidationError("Password do not attend the minimal security requisites(6 characters)");

@@ -96,7 +96,10 @@ public class ProductsIntegrationTests : IClassFixture<WebApplicationFactory<Prog
         var content = await response.Content.ReadFromJsonAsync<JsonElement>();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal("IntListTest2", content[content.GetArrayLength() - 1].GetProperty("name").GetString());
+
+        var products = content.EnumerateArray().ToList();
+        Assert.Contains(products, p => p.GetProperty("name").GetString() == "IntListTest1");
+        Assert.Contains(products, p => p.GetProperty("name").GetString() == "IntListTest2");
     }
 
     //Product DELETE (DELETE) TESTS
