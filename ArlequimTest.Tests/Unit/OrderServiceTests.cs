@@ -190,5 +190,49 @@ public class OrderServiceTests
         Assert.Equal(3, result.Items[2].Quantity);
     }
 
+    //Order list (GET) TESTS
+    [Fact]
+    public void List_ShouldReturnOrderList()
+    {
+        var newProduct = new CreateProductDto
+        {
+            Name = "UnitListOrderProduct",
+            Description = "Unit list order product",
+            Price = 10.00m
+        };
+        _productService.Create(newProduct);
+        _stockService.AddStock(new CreateStockEntryDto
+        {
+            ProductName = "UnitListOrderProduct",
+            Quantity = 50,
+            InvoiceNumber = "2026000000200"
+        });
+
+        _service.Create(new CreateOrderDto
+        {
+            CustomerDocument = "CustDoc01",
+            SellerName = "Seller01",
+            Items = [new OrderItemDto { ProductName = "UnitListOrderProduct", Quantity = 5 }]
+        });
+        _service.Create(new CreateOrderDto
+        {
+            CustomerDocument = "CustDoc02",
+            SellerName = "Seller02",
+            Items = [new OrderItemDto { ProductName = "UnitListOrderProduct", Quantity = 3 }]
+        });
+
+        var result = _service.List();
+
+        Assert.True(result.Count > 1);
+        Assert.Equal("CustDoc02", result.Last().CustomerDocument);
+        Assert.Equal("Seller02", result.Last().SellerName);
+    }
+
+    [Fact]
+    public void List_ShouldThrow_NotFoundError_WhenOrderListIsEmpty()
+    {
+        var exception = Assert.Throws<NotFoundError>(() => _service.List());
+        Assert.Equal("Order table empty", exception.Message);
+    }
 }
 

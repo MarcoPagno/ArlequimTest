@@ -109,4 +109,35 @@ public class OrderIntegrationTests : IClassFixture<WebApplicationFactory<Program
         Assert.Equal(body.items[1].quantity, content.GetProperty("items")[1].GetProperty("quantity").GetInt32());
     }
 
+    //Order List (GET) TESTS
+    [Fact]
+    public async Task GET_ListOrders_ShouldReturn200()
+    {
+        await TestHelper.AuthenticateAsAdmin(_client);
+        await TestHelper.CreateProduct(_client, "IntListOrderTest1", "Integration order list test 1", 1.00m);
+        await TestHelper.CreateProduct(_client, "IntListOrderTest2", "Integration order list test 2", 2.00m);
+        await TestHelper.CreateStock(_client, "IntListOrderTest1", 10, "2026000000199");
+        await TestHelper.CreateStock(_client, "IntListOrderTest2", 20, "2026000000198");
+
+        await TestHelper.AuthenticateAsSeller(_client);
+
+        var order = await TestHelper.CreateOrder(_client, "CustDoc", "seller01", [
+            ("IntListOrderTest1", 5),
+            ("IntListOrderTest2", 20)
+        ]);
+
+        Assert.Equal("CustDoc", order.GetProperty("customerDocument").GetString());
+        Assert.Equal("seller01", order.GetProperty("sellerName").GetString());
+        Assert.True(order.GetProperty("id").GetInt32() > 0);
+
+        var items = order.GetProperty("items").EnumerateArray().ToList();
+        Assert.Contains(items, i =>
+            i.GetProperty("productName").GetString() == "IntListOrderTest1" &&
+            i.GetProperty("quantity").GetInt32() == 5
+        );
+        Assert.Contains(items, i =>
+            i.GetProperty("productName").GetString() == "IntListOrderTest2" &&
+            i.GetProperty("quantity").GetInt32() == 20
+        );
+    }
 }

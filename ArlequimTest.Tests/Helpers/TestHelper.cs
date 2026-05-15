@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ArlequimTest.Api.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -81,6 +82,25 @@ public static class TestHelper
             productName,
             quantity,
             invoiceNumber
+        });
+
+        if (!response.IsSuccessStatusCode)
+            return default;
+
+        return await response.Content.ReadFromJsonAsync<JsonElement>();
+    }
+
+    // ==================
+    // ORDERS
+    // ==================
+
+    public static async Task<JsonElement> CreateOrder(HttpClient client, string customerDocument, string sellerName, IEnumerable<(string ProductName, int Quantity)> products)
+    {
+        var response = await client.PostAsJsonAsync("/api/orders", new
+        {
+            customerDocument,
+            sellerName,
+            items = products.Select(p => new { p.ProductName, p.Quantity })
         });
 
         if (!response.IsSuccessStatusCode)

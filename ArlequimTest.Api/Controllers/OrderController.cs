@@ -1,5 +1,6 @@
 ﻿using ArlequimTest.Api.DTOs;
 using ArlequimTest.Api.Exceptions;
+using ArlequimTest.Api.Models;
 using ArlequimTest.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace ArlequimTest.Api.Controllers;
 
 [ApiController]
 [Route("api/orders")]
+[Authorize]
 public class OrdersController : ControllerBase
 {
     private readonly OrderService _orderService;
@@ -18,7 +20,6 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
     public IActionResult Create([FromBody] CreateOrderDto dto)
     {
         try
@@ -37,6 +38,20 @@ public class OrdersController : ControllerBase
                     i.UnitPrice
                 })
             });
+        }
+        catch (AppException ex)
+        {
+            return StatusCode(ex.StatusCode, new { error = ex.Message });
+        }
+    }
+
+    [HttpGet]
+    public IActionResult GetAll()
+    {
+        try
+        {
+            var order = _orderService.List();
+            return Ok(new List<Order>(order));
         }
         catch (AppException ex)
         {
