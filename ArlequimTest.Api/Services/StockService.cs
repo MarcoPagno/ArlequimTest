@@ -17,16 +17,17 @@ public class StockService
     public StockEntry AddStock(CreateStockEntryDto dto)
     {
         //Try finding the Product and throwing errors
-        _productService.FindByName(dto.ProductName); 
+        _productService.FindByName(dto.ProductName);
 
-        if(_entries.Any(e => e.InvoiceNumber == dto.InvoiceNumber))
+        if (string.IsNullOrWhiteSpace(dto.InvoiceNumber))
+            throw new ValidationError("Invoice number is required");
+
+        if (_entries.Any(e => e.InvoiceNumber == dto.InvoiceNumber))
             throw new ValidationError("Invoice already in database");
 
         if (dto.Quantity <= 0)
             throw new ValidationError("Quantity must be greater than zero");
 
-        if (string.IsNullOrWhiteSpace(dto.InvoiceNumber))
-            throw new ValidationError("Invoice number is required");
 
         var entry = new StockEntry
         {
@@ -47,5 +48,24 @@ public class StockService
         return _entries
             .Where(e => e.ProductName.ToLower() == productName.ToLower())
             .Sum(e => e.Quantity);
+    }
+
+    public void DeductStock(string productName, int quantity)
+    {
+        if (quantity <= 0)
+            throw new ValidationError("Quantity must be greater than zero");
+
+        var available = GetAvailableStock(productName);
+        if (quantity > available)
+            throw new ValidationError($"Insufficient stock for product '{productName}'");
+
+        _entries.Add(new StockEntry
+        {
+            Id = _entries.Count + 1,
+            ProductName = productName,
+            Quantity = -quantity,
+            InvoiceNumber = "SALE",
+            CreatedAt = DateTime.UtcNow
+        });
     }
 }

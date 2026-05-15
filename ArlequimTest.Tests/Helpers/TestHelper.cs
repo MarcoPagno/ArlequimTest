@@ -48,13 +48,10 @@ public static class TestHelper
 
     public static async Task<JsonElement> CreateUser(HttpClient client, string email, string role = "Seller", string name = "Test User", string password = "123456")
     {
-        var response = await client.PostAsJsonAsync("/api/users", new
-        {
-            name,
-            email,
-            password,
-            role
-        });
+        var response = await client.PostAsJsonAsync("/api/users", new { name, email, password, role });
+
+        if (!response.IsSuccessStatusCode)
+            return default;
 
         return await response.Content.ReadFromJsonAsync<JsonElement>();
     }
@@ -65,12 +62,29 @@ public static class TestHelper
 
     public static async Task<JsonElement> CreateProduct(HttpClient client, string name, string description = "Test description", decimal price = 10.00m)
     {
-        var response = await client.PostAsJsonAsync("/api/products", new
+        var response = await client.PostAsJsonAsync("/api/products", new { name, description, price });
+
+        if (!response.IsSuccessStatusCode)
+            return default;
+
+        return await response.Content.ReadFromJsonAsync<JsonElement>();
+    }
+
+    // ==================
+    // STOCK
+    // ==================
+
+    public static async Task<JsonElement> CreateStock(HttpClient client, string productName, int quantity, string invoiceNumber)
+    {
+        var response = await client.PostAsJsonAsync("/api/stock", new
         {
-            name,
-            description,
-            price
+            productName,
+            quantity,
+            invoiceNumber
         });
+
+        if (!response.IsSuccessStatusCode)
+            return default;
 
         return await response.Content.ReadFromJsonAsync<JsonElement>();
     }

@@ -11,7 +11,7 @@ public class ProductService
     public Product Create(CreateProductDto dto)
     {
         if (_products.Any(u => u.Name.ToLower() == dto.Name.ToLower()))
-            throw new ValidationError("Product name already used");
+            throw new ConflictError("Product name already used");
 
         if (dto.Price < 0 || ((decimal.GetBits(dto.Price)[3] >> 16) & 0x7F) > 2)
             throw new ValidationError("Wrong price format");

@@ -12,12 +12,12 @@ public class ServiceError : AppException
 
 public class MethodNotAllowedError : AppException
 {
-    public MethodNotAllowedError(string message, int statusCode = 409) : base(message ?? "HTTP method not allowed for this endpoint", statusCode) { }
+    public MethodNotAllowedError(string message, int statusCode = 405) : base(message ?? "HTTP method not allowed for this endpoint", statusCode) { }
 }
 
 public class ValidationError : AppException
 {
-    public ValidationError(string message, int statusCode = 409) : base(message ?? "Invalid request data", statusCode) { }
+    public ValidationError(string message, int statusCode = 400) : base(message ?? "Invalid request data", statusCode) { }
 }
 
 public class NotFoundError : AppException
@@ -28,4 +28,9 @@ public class NotFoundError : AppException
 public class UnauthorizedError : AppException
 {
     public UnauthorizedError(string message, int statusCode = 401) : base(message ?? "User not authenticated", statusCode) { }
+}
+
+public class ConflictError : AppException
+{
+    public ConflictError(string message) : base(message ?? "Resource already exists", 409) { }
 }
