@@ -6,7 +6,7 @@ namespace ArlequimTest.Api.Services;
 
 public class OrderService
 {
-    private static List<Order> _orders = new();
+    private List<Order> _orders = new();
     private readonly ProductService _productService;
     private readonly StockService _stockService;
 
@@ -61,5 +61,14 @@ public class OrderService
 
         _orders.Add(order);
         return order;
+    }
+
+    public List<Order> List()
+    {
+
+        if (!_orders.Any())
+            throw new NotFoundError("Order table empty");
+
+        return _orders.ToList();
     }
 }

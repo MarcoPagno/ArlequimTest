@@ -15,7 +15,7 @@ REST API desenvolvida em **ASP.NET Core 9** com autenticação JWT, testes unit�
 | Microsoft.AspNetCore.Authentication.JwtBearer | 9.0 | Autenticação via JWT |
 | BCrypt.Net-Next | 4.x | Hash de senhas |
 | OpenTelemetry | 1.x | Tracing e APM |
-| Jaeger | latest | Dashboard de visualização de traces |
+| Jaeger | 1.65 | Dashboard de visualização de traces |
 | Docker | 29.x | Containerização |
 
 ---
@@ -57,8 +57,8 @@ Implementado como diferencial do desafio. O OpenTelemetry instrumenta automatica
 
 ## Pré-requisitos
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+[.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+[Docker Desktop](https://www.docker.com/products/docker-desktop)
 
 ---
 
@@ -313,8 +313,8 @@ curl -X POST http://localhost:8080/api/orders \
 ### Usuários
 | Método | Rota | Autenticação | Descrição |
 |---|---|---|---|
-| POST | `/api/users` | Nenhuma | Cadastrar usuário |
-| POST | `/api/users/login` | Nenhuma | Login e obtenção do token |
+| POST | `/api/users` | Pública | Cadastrar usuário |
+| POST | `/api/users/login` | Pública | Login e obtenção do token |
 | GET | `/api/users/me` | Qualquer | Retorna o usuário autenticado atual |
 
 ### Produtos
@@ -330,21 +330,10 @@ curl -X POST http://localhost:8080/api/orders \
 | Método | Rota | Autenticação | Descrição |
 |---|---|---|---|
 | POST | `/api/stock` | Admin | Adicionar estoque |
-| GET | `/api/stock/{productName}` | Qualquer | Consultar estoque disponível |
+| GET | `/api/stock/{productName}` | Autenticado | Consultar estoque disponível |
 
 ### Pedidos
 | Método | Rota | Autenticação | Descrição |
 |---|---|---|---|
-| POST | `/api/orders` | Qualquer | Emitir pedido |
-
----
-
-## Regras de Negócio
-
-- E-mail de usuário deve ser único
-- Senha deve ter no mínimo 6 caracteres
-- Nome de produto deve ser único
-- Estoque só pode ser adicionado por Administradores, com número de nota fiscal obrigatório
-- Pedidos com quantidade superior ao estoque disponível são rejeitados
-- O preço unitário do produto é registrado no momento da venda
-- Apenas Administradores podem cadastrar, editar e excluir produtos
+| POST | `/api/orders` | Autenticado | Emitir pedido |
+| GET | `/api/orders` | Autenticado | Listar pedidos |
