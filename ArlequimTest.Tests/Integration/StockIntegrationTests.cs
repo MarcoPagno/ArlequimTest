@@ -15,7 +15,7 @@ public class StockIntegrationTests : IClassFixture<WebApplicationFactory<Program
         _client = factory.CreateClient();
     }
 
-    //Product Creation (POST) TESTS
+    //Stock Creation (POST) TESTS
     [Fact]
     public async Task POST_CreateStockAsSeller_ShouldReturn403()
     {
@@ -65,7 +65,7 @@ public class StockIntegrationTests : IClassFixture<WebApplicationFactory<Program
         Assert.Equal(body.invoiceNumber, content.GetProperty("invoiceNumber").GetString());
     }
 
-    //Product List (GET) TESTS
+    //Stock List (GET) TESTS
     [Fact]
     public async Task GET_FindProduct_ShouldReturn200()
     {

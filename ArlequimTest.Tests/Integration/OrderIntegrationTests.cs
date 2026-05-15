@@ -16,7 +16,7 @@ public class OrderIntegrationTests : IClassFixture<WebApplicationFactory<Program
         _client = factory.CreateClient();
     }
 
-    //Product Creation (POST) TESTS
+    //Order Creation (POST) TESTS
     [Fact]
     public async Task POST_CreateOrderUnauthenticated_ShouldReturn401()
     {

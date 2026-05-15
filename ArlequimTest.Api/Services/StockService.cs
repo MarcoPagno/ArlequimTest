@@ -16,7 +16,6 @@ public class StockService
 
     public StockEntry AddStock(CreateStockEntryDto dto)
     {
-        //Try finding the Product and throwing errors
         _productService.FindByName(dto.ProductName);
 
         if (string.IsNullOrWhiteSpace(dto.InvoiceNumber))
