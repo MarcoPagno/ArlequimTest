@@ -47,7 +47,7 @@ namespace ArlequimTest.Tests.Unit
                 Role = "Admin"
             };
 
-            var exception = Assert.Throws<ValidationError>(() => _service.Create(dto));
+            var exception = Assert.Throws<ConflictError>(() => _service.Create(dto));
             Assert.Equal("Email already in use", exception.Message);
         }
 

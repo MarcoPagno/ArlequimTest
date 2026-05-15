@@ -29,7 +29,7 @@ namespace ArlequimTest.Tests.Unit
                 Price = 100.99m
             };
 
-            var exception = Assert.Throws<ValidationError>(() => _service.Create(dto));
+            var exception = Assert.Throws<ConflictError>(() => _service.Create(dto));
             Assert.Equal("Product name already used", exception.Message);
         }
 
